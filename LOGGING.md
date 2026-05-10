@@ -1,5 +1,36 @@
 # 変更・修正ログ
 
+## 2026-05-11 (セッション3: テスト修正 & 確認)
+
+### テスト日付の修正
+- [x] test_main.py の硬刻化された日付を動的日付に修正
+  - `2026-05-06` → `now - 1 day` (最近の論文)
+  - `2026-04-25` → `now - 5 days` (古い論文)
+  - 理由：テストが実行される日付によらず、常に相対的に判定する必要があるため
+- [x] すべてのテスト 70 個が再度合格確認
+  - test_collecting.py: 13/13 ✅
+  - test_config_loader.py: 11/11 ✅
+  - test_filtering.py: 21/21 ✅
+  - test_slack_notifier.py: 14/14 ✅
+  - test_main.py: 11/11 ✅（修正後全パス）
+
+### プロジェクト状態
+✅ **本格実装完了**
+- arXiv 論文取得機能
+- キーワード・日付フィルタリング
+- Slack 通知機能
+- config.json 設定管理
+- GitHub Actions ワークフロー
+- ロギング機能
+
+### デプロイ準備完了
+- ✅ ローカルテスト: 70/70 パス
+- ✅ GitHub Actions ワークフロー設定済み
+- ⏳ GitHub への push 待機
+- ⏳ SLACK_WEBHOOK_URL secrets 設定待機
+
+---
+
 ## 2026-05-06 (セッション2: GitHub Actions + Slack連携)
 
 ### config.json ベース設計の実装
