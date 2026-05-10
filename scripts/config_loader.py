@@ -5,6 +5,10 @@ config.json から検索条件・フィルタリング条件・Slack設定を読
 import json
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# .env ファイルから環境変数を読み込む
+load_dotenv()
 
 
 def load_config(config_path=None):
