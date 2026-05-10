@@ -1,6 +1,49 @@
 # 変更・修正ログ
 
+## 2026-05-11 (セッション4: GitHub push & .env設定対応)
+
+### GitHub push & リポジトリ問題解決
+- [x] .lock ファイルの削除
+  - `.git/refs/remotes/origin/main.lock` を削除してgit lockエラーを解決
+- [x] リモートマージコンフリクト解決
+  - `--allow-unrelated-histories` フラグを使用して異なる歴史を持つブランチをマージ
+  - ローカルコードでリモート（GitHub）を force push で上書き
+- [x] 埋め込みリポジトリエラー対応
+  - 誤ってコミットされた `noticejnl/` サブディレクトリを削除
+
+### 環境変数対応の改善
+- [x] config_loader.py に `load_dotenv()` 機能を追加
+  - `python-dotenv` の `load_dotenv()` を module initialization で呼び出し
+  - `.env` ファイルから `SLACK_WEBHOOK_URL` を自動読み込み
+  - 環境変数をシェルで設定する手間を削減
+- [x] `.env` ファイル作成対応
+  - `.gitignore` に `.env` を追加してセキュリティ対応
+  - Slack Webhook URLなどの秘密情報をコミット対象外に設定
+  - GitHub Push Protection による秘密情報検出をパス
+
+### 実装と動作確認
+- ✅ アプリケーション実行テスト成功
+  - arXiv から100件の論文を取得
+  - 過去3日間のデータを正しくフィルタリング
+  - Webhook URLは正常に読み込まれた
+  - ログレベルを確認し、ワークフロー全体が機能していることを確認
+
+### 手動実行での動作確認
+```
+2026-05-11 08:04:22,074 - INFO - Starting arXiv paper notification workflow...
+2026-05-11 08:04:22,074 - INFO - Loading configuration...
+2026-05-11 08:04:22,092 - INFO - Search query: silica clathrate OR clathrasil, Max results: 100, Days back: 3
+2026-05-11 08:04:22,096 - INFO - Fetching papers from arXiv...
+2026-05-11 08:04:23,955 - INFO - Fetched 100 papers
+2026-05-11 08:04:23,957 - INFO - Filtering papers by date and keywords...
+2026-05-11 08:04:23,967 - INFO - Filtered to 0 papers
+✅ 正常に完了
+```
+
+---
+
 ## 2026-05-11 (セッション3: テスト修正 & 確認)
+
 
 ### テスト日付の修正
 - [x] test_main.py の硬刻化された日付を動的日付に修正

@@ -109,25 +109,106 @@ dev-noticejnl/
 ## 使用方法
 
 ### セットアップ
+
+#### 1. リポジトリをクローン
+```bash
+git clone https://github.com/Stsh5/noticejnl.git
+cd noticejnl
+```
+
+#### 2. Python依存ライブラリをインストール
 ```bash
 pip install -r requirements.txt
 ```
 
+#### 3. 環境変数を設定
+
+**方法A: .env ファイルを使用（推奨）**
+
+プロジェクトルートに `.env` ファイルを作成してください：
+```
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+
+ファイル作成方法：
+- Windows (PowerShell):
+  ```powershell
+  echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
+  ```
+- Windows (コマンドプロンプト):
+  ```cmd
+  echo SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL > .env
+  ```
+- Linux/Mac:
+  ```bash
+  echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
+  ```
+
+**方法B: 環境変数をシェルで直接設定**
+
+- Windows (PowerShell):
+  ```powershell
+  $env:SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+  python scripts/main.py
+  ```
+
+**Slack Webhook URL の取得方法:**
+1. Slack App を開く
+2. 通知を送るチャンネルを選択
+3. 「Incoming Webhooks」を設定
+4. 生成された Webhook URL をコピー
+
 ### テスト実行
+
 ```bash
+# 全テストを実行
 pytest tests/ -v
+
+# 個別テスト実行
+pytest tests/test_collecting.py -v
+pytest tests/test_config_loader.py -v
+pytest tests/test_filtering.py -v
+pytest tests/test_slack_notifier.py -v
+pytest tests/test_main.py -v
+
+# 簡易検証スクリプト
+python verify_filtering_tests.py
+python verify_tests.py
 ```
 
 ### 手動実行
+
 ```bash
+# アプリケーションを実行
 python scripts/main.py
 ```
 
-### Task Scheduler設定
+実行結果例：
+```
+2026-05-11 08:04:22,074 - INFO - Starting arXiv paper notification workflow...
+2026-05-11 08:04:22,074 - INFO - Loading configuration...
+2026-05-11 08:04:22,092 - INFO - Search query: silica clathrate OR clathrasil, Max results: 100, Days back: 3
+2026-05-11 08:04:22,096 - INFO - Fetching papers from arXiv...
+2026-05-11 08:04:23,955 - INFO - Fetched 100 papers
+2026-05-11 08:04:23,957 - INFO - Filtering papers by date and keywords...
+2026-05-11 08:04:23,967 - INFO - Filtered to 0 papers
+2026-05-11 08:04:23,969 - INFO - Workflow completed successfully
+```
+
+### Task Scheduler 設定（Windows自動実行）
+
+毎日8:00に自動実行させるには：
+
 ```powershell
 cd scripts
 .\setup_scheduler.ps1
 ```
+
+このスクリプトが以下を設定します：
+- 実行時刻: 毎日 8:00 AM
+- 実行コマンド: `python scripts/main.py`
+- ログ出力: 実行結果をファイルに記録
+
 
 ## API仕様
 
