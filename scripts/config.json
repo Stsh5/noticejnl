@@ -1,0 +1,18 @@
+{
+  "search": {
+    "query": "silica clathrate OR clathrasil",
+    "max_results": 100,
+    "days_back": 3
+  },
+  "filter": {
+    "keywords": ["silica clathrate", "clathrasil"]
+  },
+  "slack": {
+    "webhook_url": "${SLACK_WEBHOOK_URL}"
+  },
+  "scheduling": {
+    "enabled": true,
+    "time": "08:00",
+    "timezone": "UTC"
+  }
+}
