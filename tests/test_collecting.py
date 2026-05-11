@@ -17,7 +17,7 @@ class TestFetchArxivPapers:
     """fetch_arxiv_papers関数のテスト"""
     
     def test_fetch_with_default_max_results(self):
-        """デフォルトmax_results=5で論文を取得することをテスト"""
+        """デフォルトmax_resultsで論文を取得することをテスト"""
         # モック用のXMLレスポンス
         mock_xml = '''<?xml version="1.0" encoding="UTF-8"?>
         <feed xmlns="http://www.w3.org/2005/Atom">
@@ -30,7 +30,15 @@ class TestFetchArxivPapers:
             </entry>
         </feed>'''
         
-        with patch('collecting.requests.get') as mock_get:
+        with patch('collecting.requests.get') as mock_get, \
+             patch('collecting.load_config') as mock_load_config:
+            # config.json から max_results=100 を返すように設定
+            mock_load_config.return_value = {
+                "search": {"query": "test", "max_results": 100, "days_back": 3},
+                "filter": {"keywords": ["test"]},
+                "slack": {"webhook_url": "http://test"},
+                "scheduling": {"enabled": True, "time": "08:00", "timezone": "UTC"}
+            }
             mock_response = MagicMock()
             mock_response.text = mock_xml
             mock_get.return_value = mock_response
@@ -39,7 +47,8 @@ class TestFetchArxivPapers:
             assert isinstance(papers, list)
             assert len(papers) == 1
             mock_get.assert_called_once()
-            assert 'max_results=5' in mock_get.call_args[0][0]
+            # config から max_results=100 が使用されることを確認
+            assert 'max_results=100' in mock_get.call_args[0][0]
     
     def test_fetch_with_custom_max_results(self):
         """カスタムmax_resultsで論文を取得することをテスト"""

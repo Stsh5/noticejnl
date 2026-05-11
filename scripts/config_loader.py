@@ -1,6 +1,7 @@
 """
 設定ファイル読み込みモジュール
 config.json から検索条件・フィルタリング条件・Slack設定を読み込む
+環境変数を使って動的に設定値を変更可能
 """
 import json
 import os
@@ -9,6 +10,49 @@ from dotenv import load_dotenv
 
 # .env ファイルから環境変数を読み込む
 load_dotenv()
+
+
+def _replace_env_variables(obj):
+    """
+    オブジェクト内の環境変数参照 (${VAR_NAME}) を実際の値に置換
+    
+    Args:
+        obj: 文字列、リスト、辞書など任意のオブジェクト
+    
+    Returns:
+        置換後のオブジェクト
+    
+    Raises:
+        ValueError: 環境変数が見つからない場合
+    """
+    if isinstance(obj, str):
+        # 文字列の場合、${VAR_NAME} パターンを置換
+        if obj.startswith("${") and obj.endswith("}"):
+            env_var_name = obj[2:-1]  # ${...} から ... を抽出
+            env_value = os.getenv(env_var_name)
+            
+            if env_value is None:
+                raise ValueError(f"Environment variable '{env_var_name}' not set")
+            
+            # JSON形式の場合はパース（例: ["keyword1", "keyword2"]）
+            if env_value.strip().startswith("["):
+                try:
+                    return json.loads(env_value)
+                except json.JSONDecodeError:
+                    raise ValueError(f"Failed to parse JSON in environment variable '{env_var_name}': {env_value}")
+            
+            return env_value
+        return obj
+    
+    elif isinstance(obj, dict):
+        # 辞書の場合、各値に対して再帰的に置換
+        return {key: _replace_env_variables(value) for key, value in obj.items()}
+    
+    elif isinstance(obj, list):
+        # リストの場合、各要素に対して再帰的に置換
+        return [_replace_env_variables(item) for item in obj]
+    
+    return obj
 
 
 def load_config(config_path=None):
@@ -41,7 +85,7 @@ def load_config(config_path=None):
     
     Raises:
         FileNotFoundError: config.json が見つからない場合
-        ValueError: JSON解析エラーまたは必須設定がない場合
+        ValueError: JSON解析エラー、必須設定がない場合、または環境変数が見つからない場合
     """
     if config_path is None:
         # デフォルト: スクリプト同じディレクトリの config.json
@@ -64,16 +108,11 @@ def load_config(config_path=None):
         if key not in config:
             raise ValueError(f"Missing required key '{key}' in config.json")
     
-    # 環境変数を置換 (${SLACK_WEBHOOK_URL} → 環境変数の値)
-    webhook_url = config.get("slack", {}).get("webhook_url", "")
-    if webhook_url.startswith("${") and webhook_url.endswith("}"):
-        env_var_name = webhook_url[2:-1]  # ${...} から ... を抽出
-        webhook_url = os.getenv(env_var_name, "")
-        if not webhook_url:
-            raise ValueError(f"Environment variable '{env_var_name}' not set")
-        config["slack"]["webhook_url"] = webhook_url
+    # 環境変数を置換
+    config = _replace_env_variables(config)
     
     return config
+
 
 
 def get_search_config(config):

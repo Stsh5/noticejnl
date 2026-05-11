@@ -1,5 +1,50 @@
 # 変更・修正ログ
 
+## 2026-05-11 (セッション5: 環境変数拡張 - query & keywords の動的設定)
+
+### 環境変数化による設定の簡素化
+- [x] `.env` ファイルに `SEARCH_QUERY` と `KEYWORDS` 環境変数を追加
+  - `SEARCH_QUERY=silica clathrate OR clathrasil`
+  - `KEYWORDS=["silica clathrate", "clathrasil"]` (JSON配列形式)
+  - `.env` ファイルから簡単に変更可能に
+
+- [x] `config.json` を環境変数参照形式に変更
+  - `"query": "${SEARCH_QUERY}"` → 環境変数から動的に読み込み
+  - `"keywords": "${KEYWORDS}"` → 環境変数から動的に読み込み
+  - `"webhook_url": "${SLACK_WEBHOOK_URL}"` (既存)
+
+- [x] `config_loader.py` の環境変数置換機能を拡張
+  - `_replace_env_variables()` 関数を追加（汎用化）
+  - JSON形式の環境変数（配列など）を自動解析
+  - 単純な文字列から複雑なJSONまで対応
+
+### テスト対応
+- [x] `test_collecting.py` を修正
+  - `test_fetch_with_default_max_results()` を config モック化
+  - config から max_results=100 が読まれることを確認
+  - **テスト結果: 70/70 全テスト合格 ✅**
+
+### ドキュメント更新
+- [x] `README.md` を更新
+  - 新しい環境変数の説明を追加
+  - `.env` ファイルの作成方法を更新（全OS対応）
+  - 設定値の変更方法を明確化
+
+### 動作確認
+- ✅ アプリケーション実行テスト成功
+  - arXiv API から100件の論文を取得
+  - `.env` から `SEARCH_QUERY` と `KEYWORDS` を正しく読み込み
+  - 過去3日間のデータを正しくフィルタリング
+  - すべてのログが正常に出力
+
+**メリット：**
+- ファイルエディタで config.json を直接編集する必要がなくなった
+- `.env` ファイル1つで全設定を管理可能
+- 環境ごとに異なる設定を簡単に切り替え可能
+- JSON形式のキーワード配列に対応（複数キーワードを自由に追加）
+
+---
+
 ## 2026-05-11 (セッション4: GitHub push & .env設定対応)
 
 ### GitHub push & リポジトリ問題解決

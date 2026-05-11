@@ -44,18 +44,49 @@ Windows Task Schedulerにより毎日8:00に自動実行されます。
 
 ### 設定
 
-#### 環境変数
-- `SLACK_WEBHOOK_URL`：Slack Incoming Webhook URL（必須）
+#### 環境変数 (`.env` ファイル)
 
-#### 設定ファイル (`config.json`)
+プロジェクトルートに `.env` ファイルを作成し、以下の環境変数を設定してください：
+
+```
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+SEARCH_QUERY=silica clathrate OR clathrasil
+KEYWORDS=["silica clathrate", "clathrasil"]
+```
+
+**各変数の説明：**
+- `SLACK_WEBHOOK_URL`：Slack Incoming Webhook URL（必須）
+- `SEARCH_QUERY`：arXivの検索クエリ（OR条件で複数キーワードを結合可能）
+- `KEYWORDS`：フィルタリング対象のキーワード（JSON配列形式）
+
+#### 設定ファイル (`scripts/config.json`)
+
+`config.json` は環境変数参照形式で、`.env` の値を使用します：
+
 ```json
 {
-  "keywords": ["silica clathrate", "clathrasil"],
-  "days_back": 3,
-  "slack_webhook_url": "${SLACK_WEBHOOK_URL}",
-  "log_dir": "logs"
+  "search": {
+    "query": "${SEARCH_QUERY}",
+    "max_results": 100,
+    "days_back": 3
+  },
+  "filter": {
+    "keywords": "${KEYWORDS}"
+  },
+  "slack": {
+    "webhook_url": "${SLACK_WEBHOOK_URL}"
+  },
+  "scheduling": {
+    "enabled": true,
+    "time": "08:00",
+    "timezone": "UTC"
+  }
 }
 ```
+
+**設定の変更方法：**
+1. `.env` ファイルを編集して環境変数を変更
+2. アプリケーションを再実行（config.json の変更は不要）
 
 ### エラーハンドリング
 - arXiv API 接続失敗時：エラーログ出力、Slack通知
@@ -128,20 +159,32 @@ pip install -r requirements.txt
 プロジェクトルートに `.env` ファイルを作成してください：
 ```
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+SEARCH_QUERY=silica clathrate OR clathrasil
+KEYWORDS=["silica clathrate", "clathrasil"]
 ```
 
 ファイル作成方法：
 - Windows (PowerShell):
   ```powershell
-  echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
+  @"
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+SEARCH_QUERY=silica clathrate OR clathrasil
+KEYWORDS=["silica clathrate", "clathrasil"]
+"@ | Out-File -Encoding utf8 .env
   ```
 - Windows (コマンドプロンプト):
   ```cmd
-  echo SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL > .env
+  (echo SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+  echo SEARCH_QUERY=silica clathrate OR clathrasil
+  echo KEYWORDS=["silica clathrate", "clathrasil"]) > .env
   ```
 - Linux/Mac:
   ```bash
-  echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL' > .env
+  cat > .env << 'EOF'
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+SEARCH_QUERY=silica clathrate OR clathrasil
+KEYWORDS=["silica clathrate", "clathrasil"]
+EOF
   ```
 
 **方法B: 環境変数をシェルで直接設定**
