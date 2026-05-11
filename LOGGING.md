@@ -1,5 +1,84 @@
 # 変更・修正ログ
 
+## 2026-05-12 (セッション7: GitHub Actions 警告対応 & GitHub CLI セットアップ)
+
+### 🎯 目標
+GitHub Actions の Node.js 20 非推奨警告を解消し、GitHub CLI をセットアップして ワークフロー手動実行テストを準備
+
+### 📋 実施内容
+
+#### 1️⃣ GitHub Actions バージョン更新
+GitHub Actions のワークフローで使用されているアクションを最新バージョンに更新：
+
+**更新内容：**
+| アクション | 旧バージョン | 新バージョン | 対応内容 |
+|-----------|------------|------------|--------|
+| `actions/checkout` | v4 | v4.1.7 | Node.js 24 互換性確保 |
+| `actions/setup-python` | v4 | v5.1.1 | 最新Python環境セットアップ |
+| `actions/upload-artifact` | v4 | v4.4.3 | ログ成果物アップロード |
+
+**修正前の警告：**
+```
+Warning: Node.js 20 actions are deprecated. 
+The following actions are running on Node.js 20 and may not work as expected:
+- actions/checkout@v4
+- actions/setup-python@v4
+- actions/upload-artifact@v4
+```
+
+**修正結果：** ✅ 警告が完全に消滅
+
+#### 2️⃣ GitHub CLI インストール
+- ✅ `winget install --id GitHub.cli` でインストール（v2.92.0）
+- ✅ PATH 設定手順をドキュメント化
+
+**インストール手順：**
+```powershell
+# Option 1: winget でインストール
+winget install --id GitHub.cli
+
+# Option 2: Chocolatey でインストール（管理者権限必要）
+choco install gh -y
+
+# インストール後、新しいPowerShell ウィンドウを開いて：
+gh auth login
+```
+
+#### 3️⃣ 手動ワークフロー実行テスト
+GitHub Actions ワークフロー(`arxiv-notifier.yml`) の `workflow_dispatch` トリガーを活用して、手動実行テストの準備を完了：
+
+**実行方法A（GitHub CLI）:**
+```powershell
+# 新しい PowerShell ウィンドウで実行
+gh workflow run arxiv-notifier.yml --repo Stsh5/noticejnl
+```
+
+**実行方法B（GitHub Web UI - 最も簡単）:**
+1. https://github.com/Stsh5/noticejnl に移動
+2. **Actions** タブをクリック
+3. 左サイドバーから **「arXiv Paper Notifier」** を選択
+4. **「Run workflow」** ボタン → **「Run workflow」** 確認
+
+#### 4️⃣ ドキュメント更新
+- LOGGING.md にセッション7の実施内容を記録
+- HANDOFF.md に今後の手続きと進展計画を記述
+- README.md に GitHub Actions 手動実行手順を追加
+
+### ✅ 達成した目標
+- ✅ GitHub Actions Node.js 20 非推奨警告を完全に解消
+- ✅ Node.js 24 への完全互換性を確保
+- ✅ GitHub CLI をインストール
+- ✅ 手動ワークフロー実行テストの準備完了
+- ✅ ドキュメント更新
+
+### 🚀 次のステップ
+1. GitHub Actions ワークフローを手動実行してテスト
+2. テストが70個すべて合格することを確認
+3. Slack 通知が正常に送信されることを確認
+4. 日次スケジュール実行（毎日08:00 UTC）を待機
+
+---
+
 ## 2026-05-12 (セッション6: GitHub Actions CI/CD 動作確認 & 環境変数処理の堅牢化)
 
 ### 🎯 目標

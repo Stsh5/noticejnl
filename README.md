@@ -238,20 +238,59 @@ python scripts/main.py
 2026-05-11 08:04:23,969 - INFO - Workflow completed successfully
 ```
 
-### Task Scheduler 設定（Windows自動実行）
+### GitHub Actions での自動実行
 
-毎日8:00に自動実行させるには：
+このプロジェクトは GitHub Actions により、**毎日 08:00 UTC**（日本時間 17:00）に自動実行されます。
+
+#### 手動実行テスト
+
+ワークフローを手動で実行してテストすることができます：
+
+**方法A: GitHub Web UI（推奨 - 最も簡単）**
+
+1. GitHub リポジトリを開く: https://github.com/Stsh5/noticejnl
+2. **Actions** タブをクリック
+3. 左サイドバーから **「arXiv Paper Notifier」** を選択
+4. 右上の **「Run workflow」** ボタンをクリック
+5. **「Run workflow」** で確認
+
+**方法B: GitHub CLI**
 
 ```powershell
-cd scripts
-.\setup_scheduler.ps1
+# 事前に認証設定
+gh auth login
+
+# ワークフロー実行
+gh workflow run arxiv-notifier.yml --repo Stsh5/noticejnl
 ```
 
-このスクリプトが以下を設定します：
-- 実行時刻: 毎日 8:00 AM
-- 実行コマンド: `python scripts/main.py`
-- ログ出力: 実行結果をファイルに記録
+#### ワークフロー動作内容
 
+```yaml
+毎日 08:00 UTC に自動実行
+  ↓
+1️⃣ コード取得
+  ↓
+2️⃣ Python 3.11 セットアップ
+  ↓
+3️⃣ 依存ライブラリインストール
+  ↓
+4️⃣ テスト実行（70個全テスト）
+  ↓
+5️⃣ arXiv 論文取得＆フィルタリング
+  ↓
+6️⃣ Slack 通知送信
+  ↓
+7️⃣ ログアップロード
+```
+
+#### トラブルシューティング
+
+| 症状 | 原因 | 解決策 |
+|------|------|--------|
+| Actions で赤色エラー | Secrets 未設定 | GitHub Secrets に `SLACK_WEBHOOK_URL` を設定 |
+| Slack に通知が来ない | Webhook URL 無効 | Slack Webhook URL を再確認・再設定 |
+| テストが失敗する | 環境設定問題 | ローカルで `python -m pytest tests/ -v` で確認 |
 
 ## API仕様
 
@@ -284,4 +323,4 @@ MIT License
 
 ---
 
-**最終更新：** 2026-05-06
+**最終更新：** 2026-05-12

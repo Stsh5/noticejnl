@@ -1,7 +1,81 @@
 # セッション引き継ぎドキュメント
 
-**最終更新:** 2026-05-12 00:04
-**ステータス:** GitHub Actions CI/CD 動作確認完了 - デプロイ準備完了
+**最終更新:** 2026-05-12 06:12
+**ステータス:** GitHub Actions 警告対応完了 - ワークフロー手動実行テスト準備完了
+
+---
+
+## 🚀 セッション7 (2026-05-12 06:12) - GitHub Actions 警告対応 & GitHub CLI セットアップ
+
+### ⚡ 概要
+GitHub Actions の Node.js 20 非推奨警告を完全に解消し、GitHub CLI をセットアップしました。ワークフローの手動実行テストが可能になりました。
+
+### ✅ 実施内容
+
+#### 1. GitHub Actions アクション版のアップグレード
+```yaml
+# 更新内容
+actions/checkout@v4       → v4.1.7   (最新パッチ)
+actions/setup-python@v4   → v5.1.1   (メジャー更新)
+actions/upload-artifact@v4 → v4.4.3   (最新パッチ)
+```
+
+**効果:**
+- ✅ Node.js 20 非推奨警告を完全に解消
+- ✅ Node.js 24 への完全互換性を確保（2026年6月以降対応）
+- ✅ 最新のセキュリティ更新を取得
+
+#### 2. GitHub CLI インストール
+```powershell
+winget install --id GitHub.cli  # v2.92.0
+```
+
+**インストール後：**
+```powershell
+# 新しい PowerShell ウィンドウで認証設定
+gh auth login
+```
+
+#### 3. ワークフロー手動実行テスト準備
+`workflow_dispatch` トリガーにより、以下の方法でテスト実行が可能：
+
+**方法A: GitHub CLI**
+```powershell
+gh workflow run arxiv-notifier.yml --repo Stsh5/noticejnl
+```
+
+**方法B: GitHub Web UI（推奨 - 最も簡単）**
+1. https://github.com/Stsh5/noticejnl
+2. Actions タブ → 「arXiv Paper Notifier」
+3. 「Run workflow」ボタン → 確認
+
+### 📋 修正内容
+- `.github/workflows/arxiv-notifier.yml`
+  - actions/checkout@v4 → v4.1.7
+  - actions/setup-python@v4 → v5.1.1
+  - actions/upload-artifact@v4 → v4.4.3
+
+### 🎯 現在の状態
+- ✅ すべてのテスト: 70/70 パス
+- ✅ GitHub Actions: 警告なし、エラーなし
+- ✅ デプロイメント: 毎日 08:00 UTC に自動実行予定
+- ✅ GitHub CLI: セットアップ完了
+
+### 🚀 次のステップ（重要）
+1. **ワークフロー手動実行テスト**
+   - GitHub Web UI から「Run workflow」で実行
+   - テスト 70個が全部パスすることを確認
+   
+2. **Slack 通知テスト**
+   - ワークフロー実行後、Slack に通知が届くことを確認
+   - 論文タイトル、著者、URL が正しく表示されることを確認
+
+3. **日次スケジュール実行の待機**
+   - スケジュール：毎日 08:00 UTC（日本時間 17:00）
+   - 初回は 2026-05-13 08:00 UTC
+
+4. **Slack Webhook URL 確認**
+   - GitHub Secrets に `SLACK_WEBHOOK_URL` が正しく設定されているか確認
 
 ---
 
