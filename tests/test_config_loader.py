@@ -26,19 +26,13 @@ class TestLoadConfig:
     
     def test_load_config_default_path(self):
         """デフォルトパス (scripts/config.json) から設定を読み込む"""
-        # デフォルト config.json は環境変数参照のため、全環境変数をモック
-        env_vars = {
-            "SLACK_WEBHOOK_URL": "https://hooks.slack.com/test",
-            "SEARCH_QUERY": "test query",
-            "KEYWORDS": '["test"]'
-        }
-        with patch.dict(os.environ, env_vars, clear=False):
-            config = load_config()
-            assert isinstance(config, dict)
-            assert "search" in config
-            assert "filter" in config
-            assert "slack" in config
-            assert "scheduling" in config
+        # デフォルト config.json は環境変数参照のため、環境変数がなくてもデフォルト値が使われる
+        config = load_config()
+        assert isinstance(config, dict)
+        assert "search" in config
+        assert "filter" in config
+        assert "slack" in config
+        assert "scheduling" in config
     
     def test_load_config_custom_path(self):
         """カスタムパスから設定を読み込む"""

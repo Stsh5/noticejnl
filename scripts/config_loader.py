@@ -12,24 +12,28 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def _replace_env_variables(obj):
+def _replace_env_variables(obj, defaults=None):
     """
     オブジェクト内の環境変数参照 (${VAR_NAME}) を実際の値に置換
     
     Args:
         obj: 文字列、リスト、辞書など任意のオブジェクト
+        defaults: デフォルト値辞書 {VAR_NAME: value}
     
     Returns:
         置換後のオブジェクト
     
     Raises:
-        ValueError: 環境変数が見つからない場合
+        ValueError: 環境変数が見つからず、デフォルト値もない場合
     """
+    if defaults is None:
+        defaults = {}
+    
     if isinstance(obj, str):
         # 文字列の場合、${VAR_NAME} パターンを置換
         if obj.startswith("${") and obj.endswith("}"):
             env_var_name = obj[2:-1]  # ${...} から ... を抽出
-            env_value = os.getenv(env_var_name)
+            env_value = os.getenv(env_var_name, defaults.get(env_var_name))
             
             if env_value is None:
                 raise ValueError(f"Environment variable '{env_var_name}' not set")
@@ -46,11 +50,11 @@ def _replace_env_variables(obj):
     
     elif isinstance(obj, dict):
         # 辞書の場合、各値に対して再帰的に置換
-        return {key: _replace_env_variables(value) for key, value in obj.items()}
+        return {key: _replace_env_variables(value, defaults) for key, value in obj.items()}
     
     elif isinstance(obj, list):
         # リストの場合、各要素に対して再帰的に置換
-        return [_replace_env_variables(item) for item in obj]
+        return [_replace_env_variables(item, defaults) for item in obj]
     
     return obj
 
@@ -108,8 +112,12 @@ def load_config(config_path=None):
         if key not in config:
             raise ValueError(f"Missing required key '{key}' in config.json")
     
-    # 環境変数を置換
-    config = _replace_env_variables(config)
+    # 環境変数を置換（デフォルト値を指定）
+    defaults = {
+        "SEARCH_QUERY": "default",
+        "KEYWORDS": '["default"]'
+    }
+    config = _replace_env_variables(config, defaults)
     
     return config
 

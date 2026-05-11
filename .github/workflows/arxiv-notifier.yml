@@ -30,10 +30,6 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest tests/ -v
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SEARCH_QUERY: silica clathrate OR clathrasil
-          KEYWORDS: '["silica clathrate", "clathrasil"]'
       
       - name: Execute paper notifier
         run: |
