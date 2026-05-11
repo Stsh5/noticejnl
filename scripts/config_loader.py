@@ -115,7 +115,8 @@ def load_config(config_path=None):
     # 環境変数を置換（デフォルト値を指定）
     defaults = {
         "SEARCH_QUERY": "default",
-        "KEYWORDS": '["default"]'
+        "KEYWORDS": '["default"]',
+        "SLACK_WEBHOOK_URL": "https://hooks.slack.com/default"
     }
     config = _replace_env_variables(config, defaults)
     
